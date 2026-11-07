@@ -1,6 +1,8 @@
 const { pool } = require('./db');
 
 const toItem = (d) => ({ pid: d.pid, qty: d.qty, unit_price: Number(d.unit_price) });
+// Định dạng giờ VN trực tiếp từ DB, ví dụ 2026-11-07T09:59:49.118+07:00
+const CREATED = `to_char(created_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS') || '+07:00' AS created_at`;
 
 class OrderRepository {
     // Một transaction duy nhất: Order + OrderDetail + OutboxEvent (bước 8 của sơ đồ luồng)
@@ -38,23 +40,24 @@ class OrderRepository {
     }
 
     async findById(oid) {
-        const o = await pool.query('SELECT oid, uid, discount FROM orders WHERE oid = $1', [oid]);
+        const o = await pool.query(`SELECT oid, uid, discount, ${CREATED} FROM orders WHERE oid = $1`, [oid]);
         if (!o.rows[0]) return null;
         const d = await pool.query(
             'SELECT pid, qty, unit_price FROM order_details WHERE oid = $1 ORDER BY pid', [oid]
         );
-        return { ...o.rows[0], discount: Number(o.rows[0].discount), items: d.rows.map(toItem) };
+        const r = o.rows[0];
+        return { ...r, discount: Number(r.discount), items: d.rows.map(toItem) };
     }
 
     async findByUid(uid) {
         const { rows } = await pool.query(
-            'SELECT oid, uid, discount FROM orders WHERE uid = $1 ORDER BY oid DESC', [uid]
+            `SELECT oid, uid, discount, ${CREATED} FROM orders WHERE uid = $1 ORDER BY oid DESC`, [uid]
         );
         return rows.map((r) => ({ ...r, discount: Number(r.discount) }));
     }
 
     async findAll() {
-        const { rows } = await pool.query('SELECT oid, uid, discount FROM orders ORDER BY oid DESC');
+        const { rows } = await pool.query(`SELECT oid, uid, discount, ${CREATED} FROM orders ORDER BY oid DESC`);
         return rows.map((r) => ({ ...r, discount: Number(r.discount) }));
     }
 }

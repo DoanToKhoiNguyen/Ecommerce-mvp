@@ -65,6 +65,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
       KAFKA_BROKERS: kafka:9092
+      CUSTOMER_URL: http://customer-service:3002
     depends_on:
       auth-db: { condition: service_healthy }
       kafka: { condition: service_healthy }

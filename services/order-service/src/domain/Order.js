@@ -15,9 +15,9 @@ class Order {
 
     // discount là phần trăm
     static totals(discount, items) {
-        const subtotal = items.reduce((s, i) => s + i.qty * i.unit_price, 0);
+        const subtotal = round2(items.reduce((s, i) => s + i.qty * i.unit_price, 0));
         const discount_amount = round2((subtotal * discount) / 100);
-        return { discount_amount, total_amount: round2(subtotal - discount_amount) };
+        return { subtotal, discount_amount, total_amount: round2(subtotal - discount_amount) };
     }
 }
 module.exports = Order;

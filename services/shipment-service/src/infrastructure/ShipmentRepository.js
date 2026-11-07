@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
+const { toVN } = require('../domain/time');
 
 const Shipment = mongoose.model('Shipment', new mongoose.Schema({
     shipid: { type: Number, unique: true, required: true },
     oid: { type: Number, unique: true, required: true },   // unique: chặn tạo trùng
     uid: { type: Number, required: true },
     status: { type: String, required: true },
-    history: [{ _id: false, status: String, at: Date }],   // tracking
+    history: [{ _id: false, status: String, at: String }],   // tracking
 }, { versionKey: false }));
 
 const Counter = mongoose.model('ShipmentCounter', new mongoose.Schema({
@@ -32,7 +33,7 @@ class ShipmentRepository {
         try {
             const d = await Shipment.create({
                 shipid, oid, uid, status: 'PENDING',
-                history: [{ status: 'PENDING', at: new Date() }],
+                history: [{ status: 'PENDING', at: toVN() }],
             });
             return { shipid: d.shipid, oid: d.oid, status: d.status };
         } catch (e) {
@@ -50,7 +51,7 @@ class ShipmentRepository {
     updateStatus(shipid, status) {
         return Shipment.findOneAndUpdate(
             { shipid },
-            { $set: { status }, $push: { history: { status, at: new Date() } } },
+            { $set: { status }, $push: { history: { status, at: toVN() } } },
             { new: true, projection: PUBLIC }
         ).lean();
     }

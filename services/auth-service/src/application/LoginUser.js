@@ -1,8 +1,8 @@
 const { AppError } = require('../domain/errors');
 
 class LoginUser {
-    constructor({ userRepo, hasher, tokens }) {
-        Object.assign(this, { userRepo, hasher, tokens });
+    constructor({ userRepo, hasher, tokens, customers }) {
+        Object.assign(this, { userRepo, hasher, tokens, customers });
     }
 
     async execute({ username, password }) {
@@ -12,10 +12,13 @@ class LoginUser {
         const ok = user && (await this.hasher.compare(password, user.password));
         if (!ok) throw new AppError(401, 'Invalid username or password');
 
+        const fullname = (await this.customers.getFullname({ uid: user.uid, role: user.role })) || user.username;
+
         return {
             accessToken: this.tokens.sign({ uid: user.uid, role: user.role }),
             tokenType: 'Bearer',
             expiresIn: this.tokens.expiresIn,
+            user: { uid: user.uid, username: user.username, fullname, role: user.role },
         };
     }
 }

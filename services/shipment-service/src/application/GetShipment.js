@@ -1,6 +1,14 @@
 const { AppError } = require('../domain/errors');
+const { toVN } = require('../domain/time');
 
-const hidden = ({ uid, ...rest }) => rest; // không trả uid ra ngoài
+const hidden = ({ uid, history, ...rest }) => ({
+    ...rest,
+    // dữ liệu cũ (kiểu Date) vẫn được đổi sang giờ VN, dữ liệu mới là chuỗi sẵn
+    history: (history || []).map((h) => ({
+        status: h.status,
+        at: typeof h.at === 'string' ? h.at : toVN(h.at),
+    })),
+});
 
 class GetShipment {
     constructor({ shipmentRepo }) { this.shipmentRepo = shipmentRepo; }

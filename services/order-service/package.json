@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "main": "src/server.js",
     "scripts": {
-        "start": "node src/server.js"
+        "start": "node src/server.js",
+        "consume:order": "docker compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic order-created --from-beginning --timeout-ms 5000"
     },
     "dependencies": {
         "@grpc/grpc-js": "^1.10.0",

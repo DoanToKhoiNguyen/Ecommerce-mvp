@@ -7,11 +7,10 @@ const tokens = require('./infrastructure/TokenService');
 const RegisterUser = require('./application/RegisterUser');
 const LoginUser = require('./application/LoginUser');
 const authRoutes = require('./interfaces/authRoutes');
-
+const customers = require('./infrastructure/CustomerDirectory');
 const userRepo = new UserRepository();
 const registerUser = new RegisterUser({ userRepo, hasher, publisher });
-const loginUser = new LoginUser({ userRepo, hasher, tokens });
-
+const loginUser = new LoginUser({ userRepo, hasher, tokens, customers });
 const app = express();
 app.use(express.json());
 
